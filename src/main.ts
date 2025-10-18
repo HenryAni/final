@@ -12,10 +12,22 @@ async function createApp() {
   if (!app) {
     app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-    const uploadsPath = resolve(process.cwd(), 'uploads');
-    console.log('📂 Sirviendo carpeta:', uploadsPath, fs.existsSync(uploadsPath));
+    // Solo configurar archivos estáticos en desarrollo
+    if (process.env.NODE_ENV !== 'production') {
+      const uploadsPath = resolve(process.cwd(), 'uploads');
+      console.log('📂 Sirviendo carpeta:', uploadsPath, fs.existsSync(uploadsPath));
 
-    app.use('/uploads', express.static(uploadsPath));
+      // Crear carpeta uploads si no existe (solo en desarrollo)
+      if (!fs.existsSync(uploadsPath)) {
+        try {
+          fs.mkdirSync(uploadsPath, { recursive: true });
+        } catch (error) {
+          console.warn('⚠️ No se pudo crear carpeta uploads:', error.message);
+        }
+      }
+
+      app.use('/uploads', express.static(uploadsPath));
+    }
 
     // 🔐 Habilitar CORS
     app.enableCors({
