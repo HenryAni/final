@@ -8,7 +8,7 @@ export class UploadController {
   @Post()
   @UseInterceptors(
     FileInterceptor('file', {
-      // Solo usar memoria para evitar problemas en Vercel
+      // SOLO memoria storage - compatible con Vercel serverless
       storage: memoryStorage(),
       limits: {
         fileSize: 5 * 1024 * 1024, // 5MB máximo
@@ -20,12 +20,13 @@ export class UploadController {
       return { message: 'No se subió ningún archivo.' };
     }
 
-    // Siempre usar memoria - compatible con Vercel
+    // Archivo procesado en memoria - compatible con Vercel
     return {
-      message: 'Archivo recibido correctamente',
+      message: 'Archivo recibido correctamente en memoria',
       filename: file.originalname,
       size: file.size,
       mimetype: file.mimetype,
+      buffer: file.buffer ? 'Buffer disponible' : 'Sin buffer',
       // El archivo está en memoria en file.buffer
       note: 'Archivo procesado en memoria. Para almacenamiento permanente, integrar con AWS S3, Cloudinary, etc.'
     };
