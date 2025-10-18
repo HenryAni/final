@@ -11,15 +11,5 @@
       "src": "/(.*)",
       "dest": "src/main.ts"
     }
-  ],
-  "env": {
-    "NODE_ENV": "production",
-    "DB_HOST": "@db_host",
-    "DB_PORT": "@db_port", 
-    "DB_USERNAME": "@db_username",
-    "DB_PASSWORD": "@db_password",
-    "DB_NAME": "@db_name",
-    "DB_SSL": "@db_ssl",
-    "JWT_SECRET": "@jwt_secret"
-  }
+  ]
 }
