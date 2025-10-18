@@ -1,9 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as express from 'express';
-import * as fs from 'fs';
-import { resolve } from 'path';
 import { AppModule } from './app.module';
 
 let app: NestExpressApplication;
@@ -11,23 +8,6 @@ let app: NestExpressApplication;
 async function createApp() {
   if (!app) {
     app = await NestFactory.create<NestExpressApplication>(AppModule);
-
-    // Solo configurar archivos estáticos en desarrollo
-    if (process.env.NODE_ENV !== 'production') {
-      const uploadsPath = resolve(process.cwd(), 'uploads');
-      console.log('📂 Sirviendo carpeta:', uploadsPath, fs.existsSync(uploadsPath));
-
-      // Crear carpeta uploads si no existe (solo en desarrollo)
-      if (!fs.existsSync(uploadsPath)) {
-        try {
-          fs.mkdirSync(uploadsPath, { recursive: true });
-        } catch (error) {
-          console.warn('⚠️ No se pudo crear carpeta uploads:', error.message);
-        }
-      }
-
-      app.use('/uploads', express.static(uploadsPath));
-    }
 
     // 🔐 Habilitar CORS
     app.enableCors({
