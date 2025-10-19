@@ -9,48 +9,60 @@ async function createApp() {
   if (!app) {
     app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-    // ✅ CORS seguro (NestJS nativo)
+    // 🌍 CORS dinámico (acepta solo dominios válidos)
     app.enableCors({
-      origin: [
-        'http://localhost:5173',           // para desarrollo local
-        'https://congresf.vercel.app',     // frontend en producción
-      ],
+      origin: (origin, callback) => {
+        const allowedOrigins = [
+          'http://localhost:5173',         // Frontend local
+          'https://congresf.vercel.app',   // Frontend desplegado
+        ];
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          console.warn('❌ CORS bloqueado:', origin);
+          callback(new Error('CORS no permitido'));
+        }
+      },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
     });
 
-    await app.init(); // 👈 Inicializar antes de Swagger
+    // 📁 Prefijo global para todos los endpoints
+    app.setGlobalPrefix('api');
 
-    // 📘 Swagger
+    // ⚙️ Swagger (solo se inicializa una vez)
     const config = new DocumentBuilder()
       .setTitle('API Congreso de Tecnología')
-      .setDescription('Documentación de la API con Swagger')
+      .setDescription('Documentación de la API del Congreso de Tecnología 2025')
       .setVersion('1.0')
       .addBearerAuth()
       .build();
 
     const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api', app, document);
+    SwaggerModule.setup('api/docs', app, document);
+
+    await app.init();
   }
 
   return app;
 }
 
-// 🚀 Desarrollo local
+// 🚀 Modo desarrollo local
 async function bootstrap() {
   const app = await createApp();
   const port = process.env.PORT || 3000;
   await app.listen(port);
-  console.log(`✅ Servidor en: http://localhost:${port}`);
+  console.log(`✅ Servidor corriendo en: http://localhost:${port}/api`);
+  console.log(`📘 Swagger disponible en: http://localhost:${port}/api/docs`);
 }
 
-// 🌐 Vercel handler
+// 🌐 Modo producción (Vercel handler)
 export default async function handler(req: any, res: any) {
-  // ✅ Responder preflight manualmente
+  // ✅ Manejar preflight manualmente
   if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', 'https://congresf.vercel.app');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,PATCH,OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.status(204).end();
@@ -62,7 +74,7 @@ export default async function handler(req: any, res: any) {
   return expressApp(req, res);
 }
 
-// Solo ejecutar bootstrap en desarrollo
+// 🧩 Ejecutar solo en desarrollo
 if (process.env.NODE_ENV !== 'production') {
   bootstrap();
 }
