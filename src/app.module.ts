@@ -36,7 +36,16 @@ import { UsuariosModule } from './usuarios/usuarios.module';
         autoLoadEntities: true,
         synchronize: true, // ⚠️ solo en desarrollo
         ssl: config.get<boolean>('DB_SSL') ? { rejectUnauthorized: false } : false,
-
+        // Configuración optimizada para Vercel serverless
+        extra: {
+          max: 1, // Máximo 1 conexión por instancia serverless
+          connectionTimeoutMillis: 5000,
+          idleTimeoutMillis: 10000,
+        },
+        poolSize: 1, // Una sola conexión por pool
+        connectTimeoutMS: 5000,
+        acquireTimeoutMillis: 5000,
+        logging: process.env.NODE_ENV !== 'production',
       }),
 
     }),
