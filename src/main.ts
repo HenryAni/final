@@ -9,18 +9,20 @@ async function createApp() {
   if (!app) {
     app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-    // ✅ Habilitar CORS usando el método nativo de NestJS
+    // ✅ CORS seguro (NestJS nativo)
     app.enableCors({
       origin: [
-        'https://congresf.vercel.app',    // frontend principal
-        
+        'http://localhost:5173',           // para desarrollo local
+        'https://congresf.vercel.app',     // frontend en producción
       ],
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
     });
 
-    // 📘 Configuración de Swagger
+    await app.init(); // 👈 Inicializar antes de Swagger
+
+    // 📘 Swagger
     const config = new DocumentBuilder()
       .setTitle('API Congreso de Tecnología')
       .setDescription('Documentación de la API con Swagger')
@@ -30,29 +32,37 @@ async function createApp() {
 
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api', app, document);
-
-    await app.init();
   }
 
   return app;
 }
 
-// 🚀 Bootstrap local (solo cuando no está en producción)
+// 🚀 Desarrollo local
 async function bootstrap() {
   const app = await createApp();
   const port = process.env.PORT || 3000;
   await app.listen(port);
-  console.log(`✅ Servidor iniciado en: http://localhost:${port}`);
-  console.log(`📸 Archivos disponibles en: http://localhost:${port}/uploads`);
+  console.log(`✅ Servidor en: http://localhost:${port}`);
 }
 
-// 🌐 Handler para Vercel (serverless)
+// 🌐 Vercel handler
 export default async function handler(req: any, res: any) {
+  // ✅ Responder preflight manualmente
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Origin', 'https://congresf.vercel.app');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.status(204).end();
+    return;
+  }
+
   const app = await createApp();
   const expressApp = app.getHttpAdapter().getInstance();
   return expressApp(req, res);
 }
 
+// Solo ejecutar bootstrap en desarrollo
 if (process.env.NODE_ENV !== 'production') {
   bootstrap();
 }
