@@ -9,19 +9,18 @@ async function createApp() {
   if (!app) {
     app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-    // 🔐 Habilitar CORS
-const cors = require('cors')
-
-app.use(cors({
-  origin: [
-    'http://localhost:5173',           // Para desarrollo local
-    'https://congresf.vercel.app',     // Tu frontend en producción
-    'https://congresf.vercel.app/'     // Con barra final por si acaso
-  ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}))
+    // ✅ Habilitar CORS usando el método nativo de NestJS
+    app.enableCors({
+      origin: [
+        'http://localhost:5173',          // desarrollo local
+        'https://congresf.vercel.app',    // frontend principal
+        'https://final-from-five.vercel.app', // otro frontend (si lo usas)
+        'https://pruebaaa-gilt.vercel.app', // dominio anterior (temporal)
+      ],
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+    });
 
     // 📘 Configuración de Swagger
     const config = new DocumentBuilder()
@@ -36,10 +35,11 @@ app.use(cors({
 
     await app.init();
   }
+
   return app;
 }
 
-// Para desarrollo local
+// 🚀 Bootstrap local (solo cuando no está en producción)
 async function bootstrap() {
   const app = await createApp();
   const port = process.env.PORT || 3000;
@@ -48,15 +48,13 @@ async function bootstrap() {
   console.log(`📸 Archivos disponibles en: http://localhost:${port}/uploads`);
 }
 
-// Para Vercel (serverless)
+// 🌐 Handler para Vercel (serverless)
 export default async function handler(req: any, res: any) {
   const app = await createApp();
   const expressApp = app.getHttpAdapter().getInstance();
   return expressApp(req, res);
 }
 
-// Solo ejecutar bootstrap en desarrollo
 if (process.env.NODE_ENV !== 'production') {
   bootstrap();
 }
-
