@@ -14,7 +14,7 @@ async function createApp() {
       origin: (origin, callback) => {
         const allowedOrigins = [
           'http://localhost:5173',         // Frontend local
-          'https://congresf.vercel.app',   // Frontend desplegado
+          'https://final-from-cyan.vercel.app/',   // Frontend desplegado
         ];
         if (!origin || allowedOrigins.includes(origin)) {
           callback(null, true);
