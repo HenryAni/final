@@ -12,10 +12,8 @@ async function createApp() {
     // ✅ Habilitar CORS usando el método nativo de NestJS
     app.enableCors({
       origin: [
-        'http://localhost:5173',          // desarrollo local
         'https://congresf.vercel.app',    // frontend principal
-        'https://final-from-five.vercel.app', // otro frontend (si lo usas)
-        'https://pruebaaa-gilt.vercel.app', // dominio anterior (temporal)
+        
       ],
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
