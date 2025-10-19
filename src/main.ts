@@ -11,7 +11,7 @@ async function createApp() {
 
     // 🔐 Habilitar CORS
     app.enableCors({
-      origin: ['http://localhost:5173', 'https://final-from-five.vercel.app'],
+      origin: ['https://congresf.vercel.app', 'https://final-from-five.vercel.app'],
       credentials: true,
     });
 
