@@ -10,10 +10,18 @@ async function createApp() {
     app = await NestFactory.create<NestExpressApplication>(AppModule);
 
     // 🔐 Habilitar CORS
-    app.enableCors({
-      origin: ['https://congresf.vercel.app', 'https://final-from-five.vercel.app'],
-      credentials: true,
-    });
+const cors = require('cors')
+
+app.use(cors({
+  origin: [
+    'http://localhost:5173',           // Para desarrollo local
+    'https://congresf.vercel.app',     // Tu frontend en producción
+    'https://congresf.vercel.app/'     // Con barra final por si acaso
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}))
 
     // 📘 Configuración de Swagger
     const config = new DocumentBuilder()
