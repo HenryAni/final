@@ -3,6 +3,8 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
+
+
 let app: NestExpressApplication;
 
 async function createApp() {
@@ -13,8 +15,9 @@ async function createApp() {
     app.enableCors({
       origin: (origin, callback) => {
         const allowedOrigins = [
-          'http://localhost:5173',         // Frontend local
+          'http://localhost:5173',                 // Frontend local
           'https://final-from-cyan.vercel.app/',   // Frontend desplegado
+          'https://final-from-cyan.vercel.app',    // Sin barra final
         ];
         if (!origin || allowedOrigins.includes(origin)) {
           callback(null, true);
